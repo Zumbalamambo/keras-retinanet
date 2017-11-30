@@ -59,10 +59,17 @@ def _read_classes(csv_reader):
 def _read_annotations(csv_reader, classes):
     result = {}
     for line, row in enumerate(csv_reader):
+        # If a row contains only an image path, it's an image without annotations.
+        if len(row) == 1:
+            img_file = row[0]
+            if img_file not in result:
+                result[img_file] = []
+            continue
+
         try:
             img_file, x1, y1, x2, y2, class_name = row
         except ValueError:
-            raise_from(ValueError('line {}: format should be \'img_file,x1,y1,x2,y2,class_name\''.format(line)), None)
+            raise_from(ValueError('line {}: format should be \'img_file\' or \'img_file,x1,y1,x2,y2,class_name\''.format(line)), None)
         x1 = _parse(x1, int, 'line {}: malformed x1: {{}}'.format(line))
         y1 = _parse(y1, int, 'line {}: malformed y1: {{}}'.format(line))
         x2 = _parse(x2, int, 'line {}: malformed x2: {{}}'.format(line))
